@@ -8,7 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.whitecrow.echo.MainActivity
 import com.whitecrow.echo.R
-import com.whitecrow.echo.model.VoiceRecognitionViewModel
+import com.whitecrow.echo.model.ChatViewModel
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Before
@@ -22,7 +22,7 @@ class MainFragmentTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-    private val viewModel = mockk<VoiceRecognitionViewModel>(relaxed = true)
+    private val viewModel = mockk<ChatViewModel>(relaxed = true)
     private val recognisedText = MutableLiveData("Test text")
     private val isListening = MutableLiveData(false)
 
@@ -43,7 +43,7 @@ class MainFragmentTest {
             root.removeAllViews()
 
             composeTestRule.setContent {
-                fragment.VoiceRecognitionScreen(viewModel)
+                fragment.ChatScreen(viewModel)
             }
         }
     }

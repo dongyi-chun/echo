@@ -11,11 +11,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -26,7 +26,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.whitecrow.echo.R
-import com.whitecrow.echo.model.VoiceRecognitionViewModel
+import com.whitecrow.echo.model.ChatViewModel
 import com.whitecrow.echo.util.themeColors
 
 /**
@@ -38,7 +38,7 @@ class MainFragment : Fragment() {
         fun newInstance() = MainFragment()
     }
 
-    private val viewModel: VoiceRecognitionViewModel by viewModels()
+    private val viewModel: ChatViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,7 +46,7 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ) = ComposeView(requireContext()).apply {
         setContent {
-            VoiceRecognitionScreen(viewModel = viewModel)
+            ChatScreen(viewModel = viewModel)
         }
     }
 
@@ -56,12 +56,14 @@ class MainFragment : Fragment() {
     }
 
     @Composable
-    fun VoiceRecognitionScreen(viewModel: VoiceRecognitionViewModel) {
+    fun ChatScreen(viewModel: ChatViewModel) {
         val context = LocalContext.current
         val colors = context.themeColors
 
         val recognisedText by viewModel.recognisedText.observeAsState("")
         val isListening by viewModel.isListening.observeAsState(false)
+        val respondedText by viewModel.respondedText.observeAsState("")
+        val chatMessages = remember { mutableStateListOf<String>() }
 
         MaterialTheme(
             colors = colors
@@ -69,7 +71,23 @@ class MainFragment : Fragment() {
             Column(
                 modifier = Modifier.fillMaxSize().padding(16.dp)
             ) {
-                Text(text = recognisedText, fontSize = 30.sp, color = MaterialTheme.colors.onSurface)
+                LazyColumn(modifier = Modifier.weight(1f)) {
+                    items(count = chatMessages.size, itemContent = { index ->
+                        Text(text = chatMessages[index], fontSize = 18.sp, color = MaterialTheme.colors.onSurface)
+                    })
+                }
+
+                LaunchedEffect(recognisedText, respondedText) {
+                    // From speech recognition
+                    if (recognisedText.isNotBlank()) {
+                        chatMessages.add(recognisedText)
+                        viewModel.onSendMessage(recognisedText)
+                    }
+                    // From ChatGPT end-point
+                    if (respondedText.isNotBlank()) {
+                        chatMessages.add(respondedText)
+                    }
+                }
 
                 Button(
                     onClick = {
