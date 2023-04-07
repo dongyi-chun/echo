@@ -21,7 +21,13 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
 
-      - name: Build and test
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run unit tests
+        run: ./gradlew test
+
+      - name: Run integration tests
         uses: ReactiveCircus/android-emulator-runner@v2.28.0
         with:
           api-level: 29
