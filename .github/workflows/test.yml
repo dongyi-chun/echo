@@ -22,7 +22,7 @@ jobs:
           cache: 'gradle'
 
       - name: Build and test
-        uses: ReactiveCircus/android-emulator-runner@v2
+        uses: ReactiveCircus/android-emulator-runner@v2.28.0
         with:
           api-level: 29
           script: ./gradlew connectedCheck
