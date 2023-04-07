@@ -35,6 +35,9 @@ class ChatViewModel(
     val chatMessages: LiveData<List<ChatMessage>>
         get() = _chatMessages
 
+    // Add a property to store the index of the last partial result
+    private var lastPartialResultIndex: Int? = null
+
     fun initialise(context: Context) {
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
             setRecognitionListener(recognitionListener)
@@ -52,8 +55,8 @@ class ChatViewModel(
         super.onCleared()
     }
 
-    fun onSendMessage(input: String) {
-        addInputMessageToChat(ChatMessage.Input(input.capitalize(Locale.current)))
+    fun onSendMessage(input: String, currentMessages: List<ChatMessage>? = null) {
+        addInputMessageToChat(ChatMessage.Input(input.capitalize(Locale.current)), currentMessages)
         viewModelScope.launch {
             try {
                 val response = chatGPTRepository.getChatGPTResponse(input)
@@ -64,9 +67,9 @@ class ChatViewModel(
         }
     }
 
-    private fun addInputMessageToChat(input: ChatMessage) {
-        val currentMessages = _chatMessages.value.orEmpty()
-        _chatMessages.value = currentMessages + input
+    private fun addInputMessageToChat(input: ChatMessage, currentMessages: List<ChatMessage>? = null) {
+        val messages = currentMessages ?: _chatMessages.value.orEmpty()
+        _chatMessages.value = messages + input
     }
 
     private fun addOutputMessageToChat(output: ChatMessage) {
@@ -105,20 +108,45 @@ class ChatViewModel(
             _isListening.value = false
         }
 
-        override fun onResults(results: Bundle?) {
-            results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.let {
-                if (it.isNotEmpty()) onSendMessage(it[0].capitalize(Locale.current))
+        override fun onPartialResults(partialResults: Bundle?) {
+            partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.let {
+                if (it.isNotEmpty()) {
+                    val partialMessage = ChatMessage.Input(it[0].capitalize(Locale.current))
+                    val currentMessages = _chatMessages.value.orEmpty()
+
+                    if (lastPartialResultIndex == null) {
+                        // If this is the first partial result, add it to the end of the list
+                        _chatMessages.value = currentMessages + partialMessage
+                        lastPartialResultIndex = currentMessages.size
+                    } else {
+                        // Otherwise, update the existing partial result
+                        val updatedMessages = currentMessages.toMutableList()
+                        updatedMessages[lastPartialResultIndex!!] = partialMessage
+                        _chatMessages.value = updatedMessages
+                    }
+                }
             }
-            _isListening.value = false
         }
 
-        override fun onPartialResults(partialResults: Bundle?) {
-            // TODO: Support partial results better
-            /**
-            partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.let {
-                if (it.isNotEmpty()) onSendMessage(it[0].capitalize(Locale.current))
+        override fun onResults(results: Bundle?) {
+            results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.let {
+                if (it.isNotEmpty()) {
+                    val finalMessage = it[0].capitalize(Locale.current)
+                    val currentMessages = _chatMessages.value.orEmpty()
+                    // Remove the last partial result from the list
+                    if (lastPartialResultIndex != null) {
+                        val messagesWithoutPartial = currentMessages.toMutableList().apply {
+                            removeAt(lastPartialResultIndex!!)
+                        }
+                        onSendMessage(finalMessage, messagesWithoutPartial)
+                        // Reset the lastPartialResultIndex to null
+                        lastPartialResultIndex = null
+                    } else {
+                        onSendMessage(finalMessage)
+                    }
+                }
             }
-            */
+            _isListening.value = false
         }
 
         override fun onEvent(eventType: Int, params: Bundle?) = Unit
