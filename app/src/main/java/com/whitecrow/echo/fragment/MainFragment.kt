@@ -15,7 +15,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -36,10 +38,6 @@ import com.whitecrow.echo.util.themeColors
  * Main Fragment
  */
 class MainFragment : Fragment() {
-
-    companion object {
-        fun newInstance() = MainFragment()
-    }
 
     private val viewModel: ChatViewModel by viewModels()
 
@@ -64,9 +62,7 @@ class MainFragment : Fragment() {
         val colors = context.themeColors
 
         val isListening by viewModel.isListening.observeAsState(false)
-        val recognisedMessage by viewModel.recognisedMessage.observeAsState(ChatMessage.Input())
-        val respondedMessage by viewModel.respondedMessage.observeAsState(ChatMessage.Output())
-        val chatMessages = remember { mutableStateListOf<ChatMessage>() }
+        val chatMessages by viewModel.chatMessages.observeAsState(emptyList())
 
         MaterialTheme(
             colors = colors
@@ -85,19 +81,6 @@ class MainFragment : Fragment() {
                             fontStyle = if (message is ChatMessage.Input) FontStyle.Italic else FontStyle.Normal
                         )
                     })
-                }
-
-                LaunchedEffect(recognisedMessage) {
-                    if (recognisedMessage.content.isNotBlank()) {
-                        chatMessages.add(recognisedMessage)
-                        viewModel.onSendMessage(recognisedMessage.content)
-                    }
-                }
-
-                LaunchedEffect(respondedMessage) {
-                    if (respondedMessage.content.isNotBlank()) {
-                        chatMessages.add(respondedMessage)
-                    }
                 }
 
                 Button(
@@ -133,5 +116,9 @@ class MainFragment : Fragment() {
                 Toast.LENGTH_LONG
             ).show()
         }
+    }
+
+    companion object {
+        fun newInstance() = MainFragment()
     }
 }

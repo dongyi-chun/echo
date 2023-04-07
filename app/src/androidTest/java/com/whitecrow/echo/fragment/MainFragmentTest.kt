@@ -24,12 +24,12 @@ class MainFragmentTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     private val viewModel = mockk<ChatViewModel>(relaxed = true)
-    private val recognisedText = MutableLiveData<ChatMessage>(ChatMessage.Input("Test text"))
+    private val chatMessages = MutableLiveData<List<ChatMessage>>(listOf(ChatMessage.Input("Test text")))
     private val isListening = MutableLiveData(false)
 
     @Before
     fun setUp() {
-        every { viewModel.recognisedMessage } returns recognisedText
+        every { viewModel.chatMessages } returns chatMessages
         every { viewModel.isListening } returns isListening
 
         composeTestRule.runOnUiThread {
@@ -65,5 +65,24 @@ class MainFragmentTest {
             isListening.value = true
         }
         composeTestRule.onNodeWithText("Stop Listening").assertIsDisplayed()
+    }
+
+    @Test
+    fun chatScreen_displaysRecognisedAndRespondedMessages() {
+        // Given
+        val recognisedMessage = ChatMessage.Input("Hello")
+        val respondedMessage = ChatMessage.Output("Hi")
+
+        // Prepare the chatMessages list
+        val updatedChatMessages = listOf(recognisedMessage, respondedMessage)
+
+        // Update the ViewModel's chatMessages value
+        composeTestRule.runOnUiThread {
+            chatMessages.value = updatedChatMessages
+        }
+
+        // Check that the recognisedMessage and respondedMessage are displayed
+        composeTestRule.onNodeWithText(recognisedMessage.content).assertIsDisplayed()
+        composeTestRule.onNodeWithText(respondedMessage.content).assertIsDisplayed()
     }
 }

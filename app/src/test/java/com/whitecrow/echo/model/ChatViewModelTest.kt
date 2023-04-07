@@ -53,7 +53,7 @@ class ChatViewModelTest {
         viewModel.recognitionListener.onResults(results)
 
         // check if the ViewModel recognizes the spoken text correctly
-        assertEquals(text.capitalize(), viewModel.recognisedMessage.value)
+        assertEquals(arrayListOf(ChatMessage.Input(text.capitalize())), viewModel.chatMessages.value)
     }
 
     @Test
@@ -90,6 +90,8 @@ class ChatViewModelTest {
     fun `should update responded text by ChatGPT repository`() = runTest {
         // Given
         val input = "Hello"
+        val output = "Hi"
+        val message = arrayListOf(ChatMessage.Input(input), ChatMessage.Output(output))
         val response = ChatMessage.Output("Hi")
         coEvery { repository.getChatGPTResponse(input) } returns response
 
@@ -98,6 +100,6 @@ class ChatViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assertEquals(response.content, viewModel.respondedMessage.value)
+        assertEquals(message, viewModel.chatMessages.value)
     }
 }
