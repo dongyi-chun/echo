@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.speech.SpeechRecognizer
 import androidx.test.core.app.ApplicationProvider
 import com.whitecrow.echo.data.ChatMessage
-import com.whitecrow.echo.repository.ChatGPTRepository
+import com.whitecrow.echo.repository.chat.ChatGPTRepository
 import com.whitecrow.echo.util.MainCoroutineRule
 import io.mockk.coEvery
 import io.mockk.mockk

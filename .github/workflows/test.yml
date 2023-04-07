@@ -21,6 +21,11 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
 
+      - name: Create local.properties
+        run: echo "apiKey=$API_KEY" > local.properties
+        env:
+          API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
       - name: Build with Gradle
         run: ./gradlew build
 
