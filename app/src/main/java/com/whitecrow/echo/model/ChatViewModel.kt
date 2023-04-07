@@ -11,11 +11,17 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.whitecrow.echo.repository.ChatGPTApi
+import com.whitecrow.echo.repository.ChatGPTRepository
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel for a voice recognition
  */
-class VoiceRecognitionViewModel : ViewModel() {
+class ChatViewModel(
+    private val chatGPTRepository: ChatGPTRepository = ChatGPTRepository(ChatGPTApi.service)
+) : ViewModel() {
 
     private lateinit var speechRecognizer: SpeechRecognizer
     private lateinit var speechRecognizerIntent: Intent
@@ -27,6 +33,10 @@ class VoiceRecognitionViewModel : ViewModel() {
     private val _recognisedText = MutableLiveData<String>()
     val recognisedText: LiveData<String>
         get() = _recognisedText
+
+    private val _respondedText = MutableLiveData<String>()
+    val respondedText: LiveData<String>
+        get() = _respondedText
 
     fun initialise(context: Context) {
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
@@ -43,6 +53,17 @@ class VoiceRecognitionViewModel : ViewModel() {
     override fun onCleared() {
         speechRecognizer.destroy()
         super.onCleared()
+    }
+
+    fun onSendMessage(input: String) {
+        viewModelScope.launch {
+            try {
+                val chatGPTResponse = chatGPTRepository.getChatGPTResponse(input)
+                _respondedText.value = chatGPTResponse.message
+            } catch (e: Exception) {
+                _respondedText.value = "Error: ${e.message}"
+            }
+        }
     }
 
     fun startListening() {

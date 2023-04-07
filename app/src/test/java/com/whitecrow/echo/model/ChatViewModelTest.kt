@@ -4,23 +4,38 @@ import android.content.Context
 import android.os.Bundle
 import android.speech.SpeechRecognizer
 import androidx.test.core.app.ApplicationProvider
+import com.whitecrow.echo.data.ChatGPTResponse
+import com.whitecrow.echo.repository.ChatGPTRepository
+import com.whitecrow.echo.util.MainCoroutineRule
+import io.mockk.coEvery
+import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.*
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-class VoiceRecognitionViewModelTest {
+class ChatViewModelTest {
 
-    private lateinit var viewModel: VoiceRecognitionViewModel
+    @ExperimentalCoroutinesApi
+    @get:Rule
+    var mainCoroutineRule = MainCoroutineRule()
+
+    private lateinit var viewModel: ChatViewModel
     private lateinit var context: Context
+
+    private val repository: ChatGPTRepository = mockk()
 
     @Before
     fun setUp() {
-        viewModel = VoiceRecognitionViewModel()
+        viewModel = ChatViewModel(repository)
         context = ApplicationProvider.getApplicationContext()
 
         // initialise the ViewModel
@@ -69,5 +84,20 @@ class VoiceRecognitionViewModelTest {
 
         // check that isListening is now false
         assertFalse(viewModel.isListening.value!!)
+    }
+
+    @Test
+    fun `should update responded text by ChatGPT repository`() = runTest {
+        // Given
+        val input = "Hello"
+        val response = ChatGPTResponse("Hi")
+        coEvery { repository.getChatGPTResponse(input) } returns response
+
+        // When
+        viewModel.onSendMessage(input)
+        advanceUntilIdle()
+
+        // Then
+        assertEquals(response.message, viewModel.respondedText.value)
     }
 }

@@ -9,7 +9,9 @@ def versions = [
         appCompat: "1.3.1",
         junit: "4.13.2",
         mockk: "1.13.4",
-        compose: "1.4.0"
+        compose: "1.4.0",
+        retroFit: "2.9.0",
+        coroutine: "1.5.0"
 ]
 
 android {
@@ -98,6 +100,13 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
 
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:${versions.retroFit}"
+    implementation "com.squareup.retrofit2:converter-gson:${versions.retroFit}"
+
+    // Coroutine
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutine}"
+
     // UnitTest dependencies
     testImplementation 'junit:junit:4.13.2'
     testImplementation "io.mockk:mockk:${versions.mockk}"
@@ -105,6 +114,7 @@ dependencies {
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
     testImplementation 'androidx.test:core-ktx:1.5.0'
     testImplementation 'androidx.test.ext:junit-ktx:1.1.5'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:${versions.coroutine}"
 
     // IntegrationTest dependencies
     androidTestImplementation "io.mockk:mockk-android:${versions.mockk}"
