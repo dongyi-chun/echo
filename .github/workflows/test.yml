@@ -24,4 +24,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build and test
-        run: ./gradlew check connectedCheck
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: ./gradlew connectedCheck
