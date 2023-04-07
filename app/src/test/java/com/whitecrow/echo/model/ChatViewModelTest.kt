@@ -57,6 +57,30 @@ class ChatViewModelTest {
     }
 
     @Test
+    fun `should recognise speaking text`() {
+        val text1 = "test speaking"
+        val text2 = "test speaking text"
+
+        // simulate speech recognition by sending mocked results
+        val results1 = Bundle().apply {
+            putStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION, arrayListOf(text1))
+        }
+        viewModel.recognitionListener.onPartialResults(results1)
+
+        // check if the ViewModel recognises the speaking text correctly
+        assertEquals(arrayListOf(ChatMessage.Input(text1.capitalize())), viewModel.chatMessages.value)
+
+        // simulate speech recognition by sending mocked longer results
+        val results2 = Bundle().apply {
+            putStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION, arrayListOf(text2))
+        }
+        viewModel.recognitionListener.onPartialResults(results2)
+
+        // check if the ViewModel recognises the speaking text correctly
+        assertEquals(arrayListOf(ChatMessage.Input(text2.capitalize())), viewModel.chatMessages.value)
+    }
+
+    @Test
     fun `should update isListening when startListening is called`() {
         // check that isListening is initially false
         assertFalse(viewModel.isListening.value!!)
@@ -87,7 +111,7 @@ class ChatViewModelTest {
     }
 
     @Test
-    fun `should update responded text by ChatGPT repository`() = runTest {
+    fun `should update responded text by repository`() = runTest {
         // Given
         val input = "Hello"
         val output = "Hi"
