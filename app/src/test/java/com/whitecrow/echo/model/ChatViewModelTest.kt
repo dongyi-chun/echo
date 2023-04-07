@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.speech.SpeechRecognizer
 import androidx.test.core.app.ApplicationProvider
-import com.whitecrow.echo.data.ChatGPTResponse
+import com.whitecrow.echo.data.ChatMessage
 import com.whitecrow.echo.repository.ChatGPTRepository
 import com.whitecrow.echo.util.MainCoroutineRule
 import io.mockk.coEvery
@@ -53,7 +53,7 @@ class ChatViewModelTest {
         viewModel.recognitionListener.onResults(results)
 
         // check if the ViewModel recognizes the spoken text correctly
-        assertEquals(text.capitalize(), viewModel.recognisedText.value)
+        assertEquals(text.capitalize(), viewModel.recognisedMessage.value)
     }
 
     @Test
@@ -90,7 +90,7 @@ class ChatViewModelTest {
     fun `should update responded text by ChatGPT repository`() = runTest {
         // Given
         val input = "Hello"
-        val response = ChatGPTResponse("Hi")
+        val response = ChatMessage.Output("Hi")
         coEvery { repository.getChatGPTResponse(input) } returns response
 
         // When
@@ -98,6 +98,6 @@ class ChatViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assertEquals(response.message, viewModel.respondedText.value)
+        assertEquals(response.content, viewModel.respondedMessage.value)
     }
 }

@@ -12,6 +12,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.whitecrow.echo.data.ChatMessage
 import com.whitecrow.echo.repository.ChatGPTApi
 import com.whitecrow.echo.repository.ChatGPTRepository
 import kotlinx.coroutines.launch
@@ -30,13 +31,13 @@ class ChatViewModel(
     val isListening: LiveData<Boolean>
         get() = _isListening
 
-    private val _recognisedText = MutableLiveData<String>()
-    val recognisedText: LiveData<String>
-        get() = _recognisedText
+    private val _recognisedMessage = MutableLiveData<ChatMessage>()
+    val recognisedMessage: LiveData<ChatMessage>
+        get() = _recognisedMessage
 
-    private val _respondedText = MutableLiveData<String>()
-    val respondedText: LiveData<String>
-        get() = _respondedText
+    private val _respondedMessage = MutableLiveData<ChatMessage>()
+    val respondedMessage: LiveData<ChatMessage>
+        get() = _respondedMessage
 
     fun initialise(context: Context) {
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
@@ -58,10 +59,10 @@ class ChatViewModel(
     fun onSendMessage(input: String) {
         viewModelScope.launch {
             try {
-                val chatGPTResponse = chatGPTRepository.getChatGPTResponse(input)
-                _respondedText.value = chatGPTResponse.message
+                val response = chatGPTRepository.getChatGPTResponse(input)
+                _respondedMessage.value = response
             } catch (e: Exception) {
-                _respondedText.value = "Error: ${e.message}"
+                _respondedMessage.value = ChatMessage.Output("Error: ${e.message}")
             }
         }
     }
@@ -99,14 +100,14 @@ class ChatViewModel(
 
         override fun onResults(results: Bundle?) {
             results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.let {
-                if (it.isNotEmpty()) _recognisedText.value = it[0].capitalize(Locale.current)
+                if (it.isNotEmpty()) _recognisedMessage.value = ChatMessage.Input(it[0].capitalize(Locale.current))
             }
             _isListening.value = false
         }
 
         override fun onPartialResults(partialResults: Bundle?) {
             partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.let {
-                if (it.isNotEmpty()) _recognisedText.value = it[0].capitalize(Locale.current)
+                if (it.isNotEmpty()) _recognisedMessage.value = ChatMessage.Input(it[0].capitalize(Locale.current))
             }
         }
 
