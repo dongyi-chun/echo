@@ -20,12 +20,15 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.whitecrow.echo.R
+import com.whitecrow.echo.data.ChatMessage
 import com.whitecrow.echo.model.ChatViewModel
 import com.whitecrow.echo.util.themeColors
 
@@ -60,10 +63,10 @@ class MainFragment : Fragment() {
         val context = LocalContext.current
         val colors = context.themeColors
 
-        val recognisedText by viewModel.recognisedText.observeAsState("")
         val isListening by viewModel.isListening.observeAsState(false)
-        val respondedText by viewModel.respondedText.observeAsState("")
-        val chatMessages = remember { mutableStateListOf<String>() }
+        val recognisedMessage by viewModel.recognisedMessage.observeAsState(ChatMessage.Input())
+        val respondedMessage by viewModel.respondedMessage.observeAsState(ChatMessage.Output())
+        val chatMessages = remember { mutableStateListOf<ChatMessage>() }
 
         MaterialTheme(
             colors = colors
@@ -73,19 +76,27 @@ class MainFragment : Fragment() {
             ) {
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(count = chatMessages.size, itemContent = { index ->
-                        Text(text = chatMessages[index], fontSize = 18.sp, color = MaterialTheme.colors.onSurface)
+                        val message = chatMessages[index]
+                        Text(
+                            text = message.content,
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colors.onSurface,
+                            fontWeight = if (message is ChatMessage.Input) FontWeight.Bold else FontWeight.Normal,
+                            fontStyle = if (message is ChatMessage.Input) FontStyle.Italic else FontStyle.Normal
+                        )
                     })
                 }
 
-                LaunchedEffect(recognisedText, respondedText) {
-                    // From speech recognition
-                    if (recognisedText.isNotBlank()) {
-                        chatMessages.add(recognisedText)
-                        viewModel.onSendMessage(recognisedText)
+                LaunchedEffect(recognisedMessage) {
+                    if (recognisedMessage.content.isNotBlank()) {
+                        chatMessages.add(recognisedMessage)
+                        viewModel.onSendMessage(recognisedMessage.content)
                     }
-                    // From ChatGPT end-point
-                    if (respondedText.isNotBlank()) {
-                        chatMessages.add(respondedText)
+                }
+
+                LaunchedEffect(respondedMessage) {
+                    if (respondedMessage.content.isNotBlank()) {
+                        chatMessages.add(respondedMessage)
                     }
                 }
 

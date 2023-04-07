@@ -1,6 +1,6 @@
 package com.whitecrow.echo.service
 
-import com.whitecrow.echo.data.ChatGPTResponse
+import com.whitecrow.echo.data.ChatMessage
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -9,5 +9,5 @@ import retrofit2.http.Query
  */
 interface ChatGPTService {
     @GET("your_endpoint")
-    suspend fun getChatGPTResponse(@Query("input") input: String): ChatGPTResponse
+    suspend fun getChatGPTResponse(@Query("input") input: String): ChatMessage
 }

@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.whitecrow.echo.MainActivity
 import com.whitecrow.echo.R
+import com.whitecrow.echo.data.ChatMessage
 import com.whitecrow.echo.model.ChatViewModel
 import io.mockk.every
 import io.mockk.mockk
@@ -23,12 +24,12 @@ class MainFragmentTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     private val viewModel = mockk<ChatViewModel>(relaxed = true)
-    private val recognisedText = MutableLiveData("Test text")
+    private val recognisedText = MutableLiveData<ChatMessage>(ChatMessage.Input("Test text"))
     private val isListening = MutableLiveData(false)
 
     @Before
     fun setUp() {
-        every { viewModel.recognisedText } returns recognisedText
+        every { viewModel.recognisedMessage } returns recognisedText
         every { viewModel.isListening } returns isListening
 
         composeTestRule.runOnUiThread {
