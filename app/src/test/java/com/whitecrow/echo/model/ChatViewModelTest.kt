@@ -117,7 +117,7 @@ class ChatViewModelTest {
         val output = "Hi"
         val message = arrayListOf(ChatMessage.Input(input), ChatMessage.Output(output))
         val response = ChatMessage.Output("Hi")
-        coEvery { repository.getChatGPTResponse(input) } returns response
+        coEvery { repository.getChatGPTResponse(input, any()) } returns response
 
         // When
         viewModel.onSendMessage(input)
