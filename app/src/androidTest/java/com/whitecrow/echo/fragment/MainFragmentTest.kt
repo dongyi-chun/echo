@@ -1,9 +1,8 @@
 package com.whitecrow.echo.fragment
 
 import android.view.ViewGroup
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.MutableLiveData
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.whitecrow.echo.MainActivity
@@ -84,5 +83,27 @@ class MainFragmentTest {
         // Check that the recognisedMessage and respondedMessage are displayed
         composeTestRule.onNodeWithText(recognisedMessage.content).assertIsDisplayed()
         composeTestRule.onNodeWithText(respondedMessage.content).assertIsDisplayed()
+    }
+
+    @Test
+    fun chatScreen_scrollsToLatestMessage_whenAdded() {
+        val updatedChatMessages = mutableListOf<ChatMessage>()
+
+        // Add messages
+        repeat(50) { index ->
+            // Prepare the chatMessages list
+            updatedChatMessages.add(ChatMessage.Input("Input message $index"))
+            updatedChatMessages.add(ChatMessage.Output("Output message $index"))
+        }
+        updatedChatMessages.add(ChatMessage.Input("Last message"))
+
+        // Update the ViewModel's chatMessages value
+        composeTestRule.runOnUiThread {
+            chatMessages.value = updatedChatMessages
+        }
+        composeTestRule.waitForIdle()
+
+        // Check if the last message is displayed
+        composeTestRule.onNodeWithText("Last message").assertExists()
     }
 }

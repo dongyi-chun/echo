@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -22,6 +23,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -64,13 +66,19 @@ class MainFragment : Fragment() {
         val isListening by viewModel.isListening.observeAsState(false)
         val chatMessages by viewModel.chatMessages.observeAsState(emptyList())
 
+        // To remember the LazyListState
+        val listState = rememberLazyListState()
+
         MaterialTheme(
             colors = colors
         ) {
             Column(
                 modifier = Modifier.fillMaxSize().padding(16.dp)
             ) {
-                LazyColumn(modifier = Modifier.weight(1f)) {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    state = listState
+                ) {
                     items(count = chatMessages.size, itemContent = { index ->
                         val message = chatMessages[index]
                         Text(
@@ -81,6 +89,13 @@ class MainFragment : Fragment() {
                             fontStyle = if (message is ChatMessage.Input) FontStyle.Italic else FontStyle.Normal
                         )
                     })
+                }
+
+                // Add LaunchedEffect with chatMessages as the key for auto scrolling to the last
+                LaunchedEffect(chatMessages) {
+                    if (chatMessages.isNotEmpty()) {
+                        listState.animateScrollToItem(chatMessages.lastIndex)
+                    }
                 }
 
                 Button(
