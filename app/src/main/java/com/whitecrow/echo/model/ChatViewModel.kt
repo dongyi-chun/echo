@@ -35,6 +35,9 @@ class ChatViewModel(
     val chatMessages: LiveData<List<ChatMessage>>
         get() = _chatMessages
 
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     // Add a property to store the index of the last partial result
     private var lastPartialResultIndex: Int? = null
 
@@ -59,7 +62,7 @@ class ChatViewModel(
         addInputMessageToChat(ChatMessage.Input(input.capitalize(Locale.current)), currentMessages)
         viewModelScope.launch {
             try {
-                val response = chatGPTRepository.getChatGPTResponse(input)
+                val response = chatGPTRepository.getChatGPTResponse(input, _isLoading::postValue)
                 addOutputMessageToChat(response)
             } catch (e: Exception) {
                 addOutputMessageToChat(ChatMessage.Output("Error: ${e.message}"))

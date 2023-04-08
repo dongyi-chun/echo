@@ -8,9 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
@@ -20,10 +19,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -65,6 +65,7 @@ class MainFragment : Fragment() {
 
         val isListening by viewModel.isListening.observeAsState(false)
         val chatMessages by viewModel.chatMessages.observeAsState(emptyList())
+        val isLoading by viewModel.isLoading.observeAsState(false)
 
         // To remember the LazyListState
         val listState = rememberLazyListState()
@@ -79,16 +80,23 @@ class MainFragment : Fragment() {
                     modifier = Modifier.weight(1f),
                     state = listState
                 ) {
-                    items(count = chatMessages.size, itemContent = { index ->
-                        val message = chatMessages[index]
-                        Text(
-                            text = message.content,
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colors.onSurface,
-                            fontWeight = if (message is ChatMessage.Input) FontWeight.Bold else FontWeight.Normal,
-                            fontStyle = if (message is ChatMessage.Input) FontStyle.Italic else FontStyle.Normal
-                        )
-                    })
+                    items(
+                        count = chatMessages.size + if (isLoading) 1 else 0,
+                        itemContent = { index ->
+                            if (index == chatMessages.size && isLoading) {
+                                LoadingDots()
+                            } else {
+                                val message = chatMessages[index]
+                                Text(
+                                    text = message.content,
+                                    fontSize = 18.sp,
+                                    color = MaterialTheme.colors.onSurface,
+                                    fontWeight = if (message is ChatMessage.Input) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (message is ChatMessage.Input) FontStyle.Italic else FontStyle.Normal
+                                )
+                            }
+                        }
+                    )
                 }
 
                 // Add LaunchedEffect with chatMessages as the key for auto scrolling to the last
@@ -116,6 +124,37 @@ class MainFragment : Fragment() {
                         color = MaterialTheme.colors.onPrimary
                     )
                 }
+            }
+        }
+    }
+
+    @Composable
+    fun LoadingDots() {
+        val dotCount = 3
+        val duration = 500
+
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            val infiniteTransition = rememberInfiniteTransition()
+
+            for (i in 0 until dotCount) {
+                val delay = i * duration / dotCount
+                val scale by infiniteTransition.animateFloat(
+                    initialValue = 0f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(duration, easing = LinearEasing, delayMillis = delay),
+                        repeatMode = RepeatMode.Reverse
+                    )
+                )
+                Text(
+                    text = ".",
+                    fontSize = 18.sp,
+                    modifier = Modifier.scale(scale)
+                )
             }
         }
     }
