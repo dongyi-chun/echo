@@ -24,11 +24,23 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
 
+      - name: Install Homebrew and GNU sed
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo "/usr/local/bin" >> $GITHUB_PATH
+          brew install gnu-sed
+
       - name: Bump version code
         run: |
           versionCode=$(( $(git rev-list --count HEAD) + 1 ))
           echo "Bumping version code to $versionCode"
-          sed -i "s/versionCode [0-9]*/versionCode $versionCode/" app/build.gradle
+          gsed -i "s/versionCode [0-9]*/versionCode $versionCode/" app/build.gradle
+
+      - name: Create local.properties
+        run: echo "apiKey=$API_KEY" > local.properties
+        env:
+          API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
       - name: Build APK
         run: ./gradlew assembleDebug
 
