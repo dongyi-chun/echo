@@ -12,8 +12,7 @@ import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -147,4 +146,23 @@ class ChatViewModelTest {
         assertEquals(expectedMessages, viewModel.chatMessages.value)
     }
 
+    @Test
+    fun `test onSendMessage handles exception and updates isLoading`() = runTest {
+        // Given
+        val input = "Hello"
+        val exceptionMessage = "An error occurred"
+        coEvery { repository.getChatGPTResponse(input, any(), any()) } throws Exception(exceptionMessage)
+
+        // When
+        viewModel.onSendMessage(input)
+        advanceUntilIdle()
+
+        // Then
+        // Check if an output message with the exception message is added to the chat
+        val expectedMessages = arrayListOf(ChatMessage.Input(input.capitalize()), ChatMessage.Output("Error: $exceptionMessage"))
+        assertEquals(expectedMessages, viewModel.chatMessages.value)
+
+        // Check if isLoading is updated to false after handling the exception
+        assertEquals(false, viewModel.isLoading.value)
+    }
 }
