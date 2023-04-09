@@ -58,11 +58,12 @@ class ChatViewModel(
         super.onCleared()
     }
 
-    fun onSendMessage(input: String, currentMessages: List<ChatMessage>? = null) {
+    fun onSendMessage(input: String, currentMessages: List<ChatMessage> = mutableListOf()) {
         addInputMessageToChat(ChatMessage.Input(input.capitalize(Locale.current)), currentMessages)
         viewModelScope.launch {
             try {
-                val response = chatGPTRepository.getChatGPTResponse(input, _isLoading::postValue)
+                val response = chatGPTRepository.getChatGPTResponse(
+                    input, currentMessages, _isLoading::postValue)
                 addOutputMessageToChat(response)
             } catch (e: Exception) {
                 addOutputMessageToChat(ChatMessage.Output("Error: ${e.message}"))
@@ -70,9 +71,8 @@ class ChatViewModel(
         }
     }
 
-    private fun addInputMessageToChat(input: ChatMessage, currentMessages: List<ChatMessage>? = null) {
-        val messages = currentMessages ?: _chatMessages.value.orEmpty()
-        _chatMessages.value = messages + input
+    private fun addInputMessageToChat(input: ChatMessage, currentMessages: List<ChatMessage>) {
+        _chatMessages.value = currentMessages + input
     }
 
     private fun addOutputMessageToChat(output: ChatMessage) {
