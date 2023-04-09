@@ -117,7 +117,7 @@ class ChatViewModelTest {
         val output = "Hi"
         val message = arrayListOf(ChatMessage.Input(input), ChatMessage.Output(output))
         val response = ChatMessage.Output("Hi")
-        coEvery { repository.getChatGPTResponse(input, any()) } returns response
+        coEvery { repository.getChatGPTResponse(input, any(), any()) } returns response
 
         // When
         viewModel.onSendMessage(input)
@@ -126,4 +126,25 @@ class ChatViewModelTest {
         // Then
         assertEquals(message, viewModel.chatMessages.value)
     }
+
+    @Test
+    fun `onSendMessage should pass currentMessages correctly`() = runTest {
+        // Given
+        val input = "Hello"
+        val messages = listOf(
+            ChatMessage.Input("Initial user message"),
+            ChatMessage.Output("Initial system message")
+        )
+        val response = ChatMessage.Output("Response")
+        coEvery { repository.getChatGPTResponse(input, messages, any()) } returns response
+
+        // When
+        viewModel.onSendMessage(input, messages)
+        advanceUntilIdle()
+
+        // Then
+        val expectedMessages = messages + ChatMessage.Input(input.capitalize()) + response
+        assertEquals(expectedMessages, viewModel.chatMessages.value)
+    }
+
 }

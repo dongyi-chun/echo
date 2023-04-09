@@ -43,7 +43,7 @@ class ChatGPTRepositoryTest {
 
         prepareResponse(expectedOutput)
 
-        val result = chatGPTRepository.getChatGPTResponse(input) {}
+        val result = chatGPTRepository.getChatGPTResponse(input, mutableListOf()) {}
         assert(result.content == expectedOutput)
     }
 
@@ -57,7 +57,7 @@ class ChatGPTRepositoryTest {
 
         // When
         var loading = false
-        val result = chatGPTRepository.getChatGPTResponse(input) { isLoading -> loading = isLoading }
+        val result = chatGPTRepository.getChatGPTResponse(input, mutableListOf()) { isLoading -> loading = isLoading }
 
         // Then
         assertEquals(ChatMessage.Output(expectedOutput), result)
