@@ -67,6 +67,9 @@ class ChatViewModel(
                 addOutputMessageToChat(response)
             } catch (e: Exception) {
                 addOutputMessageToChat(ChatMessage.Output("Error: ${e.message}"))
+            } finally {
+                // Make sure that a loading animation is hidden
+                _isLoading.postValue(false)
             }
         }
     }
