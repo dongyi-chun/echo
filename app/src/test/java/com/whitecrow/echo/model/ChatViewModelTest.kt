@@ -7,6 +7,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.whitecrow.echo.data.ChatMessage
 import com.whitecrow.echo.repository.chat.ChatGPTRepository
 import com.whitecrow.echo.util.MainCoroutineRule
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.HiltTestApplication
 import io.mockk.coEvery
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
@@ -18,22 +21,30 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@HiltAndroidTest
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
+@Config(application = HiltTestApplication::class)
 class ChatViewModelTest {
 
     @ExperimentalCoroutinesApi
     @get:Rule
     var mainCoroutineRule = MainCoroutineRule()
 
+    @get:Rule
+    var hiltRule = HiltAndroidRule(this)
+
+    var repository: ChatGPTRepository = mockk(relaxed = true)
+
     private lateinit var viewModel: ChatViewModel
     private lateinit var context: Context
 
-    private val repository: ChatGPTRepository = mockk()
-
     @Before
     fun setUp() {
+        hiltRule.inject()
+
         viewModel = ChatViewModel(repository)
         context = ApplicationProvider.getApplicationContext()
 

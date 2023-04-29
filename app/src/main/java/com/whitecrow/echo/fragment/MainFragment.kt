@@ -8,8 +8,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
@@ -35,10 +45,12 @@ import com.whitecrow.echo.R
 import com.whitecrow.echo.data.ChatMessage
 import com.whitecrow.echo.model.ChatViewModel
 import com.whitecrow.echo.util.themeColors
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * Main Fragment
  */
+@AndroidEntryPoint
 class MainFragment : Fragment() {
 
     private val viewModel: ChatViewModel by viewModels()
