@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id "com.google.dagger.hilt.android"
+    id "kotlin-kapt"
 }
 
 def versions = [
@@ -114,6 +116,10 @@ dependencies {
     // Coroutine
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutine}"
 
+    // Hilt
+    implementation "com.google.dagger:hilt-android:2.45"
+    implementation "com.google.dagger:hilt-android-compiler:2.45"
+
     // UnitTest dependencies
     testImplementation 'junit:junit:4.13.2'
     testImplementation "io.mockk:mockk:${versions.mockk}"
@@ -130,4 +136,9 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:${versions.compose}"
+}
+
+// Allow references to generated code
+kapt {
+    correctErrorTypes = true
 }
