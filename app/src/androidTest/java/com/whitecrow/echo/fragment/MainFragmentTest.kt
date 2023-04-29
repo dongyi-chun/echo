@@ -9,6 +9,9 @@ import com.whitecrow.echo.MainActivity
 import com.whitecrow.echo.R
 import com.whitecrow.echo.data.ChatMessage
 import com.whitecrow.echo.model.ChatViewModel
+import dagger.hilt.android.testing.BindValue
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Before
@@ -16,18 +19,26 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class MainFragmentTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-    private val viewModel = mockk<ChatViewModel>(relaxed = true)
+    @get:Rule
+    var hiltRule = HiltAndroidRule(this)
+
+    @BindValue
+    val viewModel = mockk<ChatViewModel>(relaxed = true)
+
     private val chatMessages = MutableLiveData<List<ChatMessage>>(listOf(ChatMessage.Input("Test text")))
     private val isListening = MutableLiveData(false)
 
     @Before
     fun setUp() {
+        hiltRule.inject()
+
         every { viewModel.chatMessages } returns chatMessages
         every { viewModel.isListening } returns isListening
 
@@ -43,7 +54,7 @@ class MainFragmentTest {
             root.removeAllViews()
 
             composeTestRule.setContent {
-                fragment.ChatScreen(viewModel)
+                fragment.ChatScreen()
             }
         }
     }

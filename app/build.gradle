@@ -33,7 +33,7 @@ android {
 
         buildConfigField "String", "API_KEY", localProperties['apiKey']
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.whitecrow.echo.util.CustomTestRunner"
     }
 
     buildTypes {
