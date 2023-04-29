@@ -61,7 +61,7 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ) = ComposeView(requireContext()).apply {
         setContent {
-            ChatScreen(viewModel = viewModel)
+            ChatScreen()
         }
     }
 
@@ -71,7 +71,7 @@ class MainFragment : Fragment() {
     }
 
     @Composable
-    fun ChatScreen(viewModel: ChatViewModel) {
+    fun ChatScreen() {
         val context = LocalContext.current
         val colors = context.themeColors
 
