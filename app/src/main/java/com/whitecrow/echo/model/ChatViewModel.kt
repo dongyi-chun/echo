@@ -13,15 +13,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.whitecrow.echo.data.ChatMessage
-import com.whitecrow.echo.repository.chat.ChatGPTApi
 import com.whitecrow.echo.repository.chat.ChatGPTRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel for a voice recognition
  */
-class ChatViewModel(
-    private val chatGPTRepository: ChatGPTRepository = ChatGPTRepository(ChatGPTApi.service)
+@HiltViewModel
+class ChatViewModel @Inject constructor(
+    val chatGPTRepository: ChatGPTRepository
 ) : ViewModel() {
 
     private lateinit var speechRecognizer: SpeechRecognizer

@@ -1,11 +1,17 @@
 package com.whitecrow.echo.repository.chat
 
 import com.whitecrow.echo.data.ChatMessage
+import dagger.hilt.android.scopes.ViewModelScoped
+import javax.inject.Inject
 
 /**
  * Repository for ChatGPT
  */
-class ChatGPTRepository(private val chatGPTService: ChatGPTService) {
+@ViewModelScoped
+class ChatGPTRepository @Inject constructor(
+    private val chatGPTService: ChatGPTService
+) {
+
     suspend fun getChatGPTResponse(
         input: String,
         currentMessages: List<ChatMessage>,
