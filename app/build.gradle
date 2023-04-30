@@ -59,12 +59,12 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-
     packagingOptions {
-        exclude 'META-INF/LICENSE.md'
-        exclude 'META-INF/LICENSE-notice.md'
-        exclude 'META-INF/gradle/incremental.annotation.processors'
+        resources {
+            excludes += ['META-INF/LICENSE.md', 'META-INF/LICENSE-notice.md', 'META-INF/gradle/incremental.annotation.processors']
+        }
     }
+
 
     testOptions {
         packagingOptions {
