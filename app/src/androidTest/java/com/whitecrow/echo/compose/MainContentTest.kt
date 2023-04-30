@@ -1,4 +1,4 @@
-package com.whitecrow.echo.fragment
+package com.whitecrow.echo.compose
 
 import android.view.ViewGroup
 import androidx.compose.ui.test.*
@@ -6,7 +6,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.MutableLiveData
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.whitecrow.echo.MainActivity
-import com.whitecrow.echo.R
 import com.whitecrow.echo.data.ChatMessage
 import com.whitecrow.echo.model.ChatViewModel
 import dagger.hilt.android.testing.BindValue
@@ -21,7 +20,7 @@ import org.junit.runner.RunWith
 
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
-class MainFragmentTest {
+class MainContentTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
@@ -43,18 +42,12 @@ class MainFragmentTest {
         every { viewModel.isListening } returns isListening
 
         composeTestRule.runOnUiThread {
-            // Attaching a test fragment
-            val fragment = MainFragment.newInstance()
-            composeTestRule.activity.supportFragmentManager.beginTransaction()
-                .replace(R.id.container, fragment)
-                .commitNow()
-
             // Prevent a duplicated setContent() call
             val root = composeTestRule.activity.findViewById<ViewGroup>(android.R.id.content)
             root.removeAllViews()
 
             composeTestRule.setContent {
-                fragment.ChatScreen()
+                MainContent()
             }
         }
     }
