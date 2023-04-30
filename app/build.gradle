@@ -78,6 +78,7 @@ android {
             returnDefaultValues = true
         }
     }
+    testNamespace 'com.whitecrow.echo.test'
 }
 
 dependencies {
